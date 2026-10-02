@@ -115,6 +115,23 @@ button{font:inherit;color:inherit}
 .figure img{display:block;max-width:100%;width:440px;height:auto;border-radius:6px;border:1px solid var(--line)}
 .figure img.wide{width:100%;background:#fff}
 .figure figcaption{font:400 12px/1.4 var(--ui);color:var(--muted);margin-top:6px}
+.labpanel{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:#DCE1EE;color:#111;z-index:40;display:flex;flex-direction:column;box-shadow:-8px 0 30px rgba(0,0,0,.28);font-family:Arial,Helvetica,sans-serif}
+.labhead{display:flex;align-items:center;gap:10px;padding:14px 14px 10px;background:#fff}
+.labhead input{flex:1;font:16px Arial,Helvetica,sans-serif;padding:9px 10px;border:1px solid #8a8a8a;border-radius:2px;color:#111;background:#fff}
+.labx{background:#1E4A78;color:#fff;border:0;border-radius:6px;width:42px;height:40px;font-size:22px;cursor:pointer;flex:none}
+.labtabs{display:flex;gap:2px;padding:0 10px;background:#fff;border-bottom:1px solid #b9c0d0;flex-wrap:wrap}
+.labtabs button{font:15px Arial,Helvetica,sans-serif;padding:8px 10px;border:1px solid #b9c0d0;border-bottom:0;background:#fff;color:#111;cursor:pointer;border-radius:3px 3px 0 0;margin-bottom:-1px}
+.labtabs button[aria-selected="true"]{background:#DCE1EE;font-weight:700}
+.labscroll{flex:1;overflow-y:auto;min-height:0}
+.labtbl{width:100%;border-collapse:collapse;font-size:15px;line-height:1.35}
+.labtbl td{padding:9px 8px;border-bottom:1px solid #b9c0d0;vertical-align:top}
+.labtbl td:first-child{width:46%}
+.labtbl tr.lh td{font-weight:700;padding-top:12px}
+.labtbl tr.lh td:last-child{text-align:center}
+.labtbl tr.ls td{font-weight:700;font-style:italic}
+.labtbl tr.li td:first-child{padding-left:28px}
+.labtbl .lempty{text-align:center;color:#555;padding:24px}
+#labbtn[aria-pressed="true"]{background:rgba(250,246,235,.18)}
 .fz{display:flex;align-items:center;gap:2px}
 .fz button{background:transparent;border:1px solid rgba(250,246,235,.5);color:var(--bar-ink);font:700 14px/1 var(--ui);padding:7px 9px;border-radius:6px;cursor:pointer;min-width:38px}
 .fz button:disabled{opacity:.35;cursor:default}
@@ -409,6 +426,7 @@ const ICON = {
   end:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
   full:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   exitfull:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
+  lab:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7 15h10"/></svg>',
   pause:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 9v6M14 9v6"/></svg>'
 };
 
@@ -498,7 +516,215 @@ let fsIdx = 2; try{ const v = parseInt(localStorage.getItem("grand-rounds-fonte"
 function applyFont(){ document.documentElement.style.setProperty("--qs", FS_STEPS[fsIdx]); try{ localStorage.setItem("grand-rounds-fonte", String(fsIdx)); }catch(e){}
   const a=document.getElementById("fzm"), b=document.getElementById("fzp"); if(a) a.disabled = fsIdx===0; if(b) b.disabled = fsIdx===FS_STEPS.length-1; }
 applyFont();
+/* ---------- lab values ---------- */
+/* row types: H = section (bold italic), S = subsection (bold), r = row, i = indented row, c = continuation (value only) */
+const LABS = {
+"Serum": [
+ ["H","SERUM"],
+ ["S","General Chemistry"],
+ ["S","Electrolytes"],
+ ["i","Sodium (Na⁺)","136–146 mEq/L"],
+ ["i","Potassium (K⁺)","3.5–5.0 mEq/L"],
+ ["i","Chloride (Cl⁻)","95–105 mEq/L"],
+ ["i","Bicarbonate (HCO₃⁻)","22–28 mEq/L"],
+ ["r","Urea nitrogen","7–18 mg/dL"],
+ ["r","Creatinine","0.6–1.2 mg/dL"],
+ ["r","Glucose","Fasting: 70–100 mg/dL"],
+ ["c","","Random, non-fasting: <140 mg/dL"],
+ ["r","Calcium","8.4–10.2 mg/dL"],
+ ["r","Magnesium (Mg²⁺)","1.5–2.0 mg/dL"],
+ ["r","Phosphorus (inorganic)","3.0–4.5 mg/dL"],
+ ["S","Hepatic"],
+ ["r","Alanine aminotransferase (ALT)","10–40 U/L"],
+ ["r","Aspartate aminotransferase (AST)","12–38 U/L"],
+ ["r","Alkaline phosphatase","25–100 U/L"],
+ ["r","Bilirubin, Total // Direct","0.1–1.0 mg/dL // 0.0–0.3 mg/dL"],
+ ["r","Proteins, total","6.0–7.8 g/dL"],
+ ["i","Albumin","3.5–5.5 g/dL"],
+ ["i","Globulin","2.3–3.5 g/dL"],
+ ["S","Other, Serum"],
+ ["r","Amylase","25–125 U/L"],
+ ["r","Lipase","13–60 U/L"],
+ ["r","Creatinine clearance","Male: 97–137 mL/min"],
+ ["c","","Female: 88–128 mL/min"],
+ ["r","Creatine kinase","Male: 25–90 U/L"],
+ ["c","","Female: 10–70 U/L"],
+ ["r","Lactate dehydrogenase","45–200 U/L"],
+ ["r","Osmolality","275–295 mOsmol/kg H₂O"],
+ ["r","Troponin I","≤0.04 ng/mL"],
+ ["r","Uric acid","3.0–8.2 mg/dL"],
+ ["S","Lipids"],
+ ["r","Cholesterol, total","Normal: <200 mg/dL"],
+ ["c","","High: >240 mg/dL"],
+ ["i","HDL","40–60 mg/dL"],
+ ["i","LDL","<160 mg/dL"],
+ ["r","Triglycerides","Normal: <150 mg/dL"],
+ ["c","","Borderline: 151–199 mg/dL"],
+ ["S","Iron Studies"],
+ ["r","Ferritin","Male: 20–250 ng/mL"],
+ ["c","","Female: 10–120 ng/mL"],
+ ["r","Iron","Male: 65–175 μg/dL"],
+ ["c","","Female: 50–170 μg/dL"],
+ ["r","Total iron-binding capacity","250–400 μg/dL"],
+ ["r","Transferrin","200–360 mg/dL"],
+ ["S","Endocrine"],
+ ["r","Follicle-stimulating hormone","Male: 4–25 mIU/mL"],
+ ["c","","Female: premenopause 4–30 mIU/mL"],
+ ["c","","   midcycle peak 10–90 mIU/mL"],
+ ["c","","   postmenopause 40–250 mIU/mL"],
+ ["r","Luteinizing hormone","Male: 6–23 mIU/mL"],
+ ["c","","Female: follicular phase 5–30 mIU/mL"],
+ ["c","","   midcycle 75–150 mIU/mL"],
+ ["c","","   postmenopause 30–200 mIU/mL"],
+ ["r","Growth hormone - arginine stimulation","Fasting: <5 ng/mL"],
+ ["c","","Provocative stimuli: >7 ng/mL"],
+ ["r","Prolactin (hPRL)","Male: <17 ng/mL"],
+ ["c","","Female: <25 ng/mL"],
+ ["r","Cortisol","0800 h: 5–23 μg/dL"],
+ ["c","","1600 h: 3–15 μg/dL"],
+ ["c","","2000 h: <50% of 0800 h"],
+ ["r","Thyroid-stimulating hormone (TSH)","0.4–4.0 μU/mL"],
+ ["r","Triiodothyronine (T₃) (RIA)","100–200 ng/dL"],
+ ["r","Triiodothyronine (T₃) resin uptake","25%–35%"],
+ ["r","Thyroxine (T₄)","5–12 μg/dL"],
+ ["r","Free T₄","0.9–1.7 ng/dL"],
+ ["r","Thyroidal iodine (¹²³I) uptake","8%–30% of administered dose/24 h"],
+ ["r","Intact parathyroid hormone (PTH)","10–60 pg/mL"],
+ ["r","17-Hydroxycorticosteroids","Male: 3.0–10.0 mg/24 h"],
+ ["c","","Female: 2.0–8.0 mg/24 h"],
+ ["r","17-Ketosteroids, total","Male: 8–20 mg/24 h"],
+ ["c","","Female: 6–15 mg/24 h"],
+ ["S","Immunoglobulins"],
+ ["r","IgA","76–390 mg/dL"],
+ ["r","IgE","0–380 IU/mL"],
+ ["r","IgG","650–1500 mg/dL"],
+ ["r","IgM","50–300 mg/dL"],
+ ["H","GASES, ARTERIAL BLOOD (ROOM AIR)"],
+ ["r","PO₂","75–105 mm Hg"],
+ ["r","PCO₂","33–45 mm Hg"],
+ ["r","pH","7.35–7.45"]
+],
+"Cerebrospinal": [
+ ["H","CEREBROSPINAL"],
+ ["r","Cell count","0–5/mm³"],
+ ["r","Chloride","118–132 mEq/L"],
+ ["r","Gamma globulin","3%–12% total proteins"],
+ ["r","Glucose","40–70 mg/dL"],
+ ["r","Pressure","70–180 mm H₂O"],
+ ["r","Proteins, total","<40 mg/dL"]
+],
+"Blood": [
+ ["H","BLOOD"],
+ ["S","Erythrocyte count"],
+ ["i","Male","4.3–5.9 million/mm³"],
+ ["i","Female","3.5–5.5 million/mm³"],
+ ["S","Erythrocyte sedimentation rate (Westergren)"],
+ ["i","Male","0–15 mm/h"],
+ ["i","Female","0–20 mm/h"],
+ ["S","Hematocrit"],
+ ["i","Male","41%–53%"],
+ ["i","Female","36%–46%"],
+ ["S","Hemoglobin, blood"],
+ ["i","Male","13.5–17.5 g/dL"],
+ ["i","Female","12.0–16.0 g/dL"],
+ ["r","Hemoglobin A₁c","≤6%"],
+ ["r","Hemoglobin, plasma","<4 mg/dL"],
+ ["r","Leukocyte count (WBC)","4500–11,000/mm³"],
+ ["r","Neutrophils, segmented","54%–62%"],
+ ["r","Neutrophils, bands","3%–5%"],
+ ["r","Eosinophils","1%–3%"],
+ ["r","Basophils","0%–0.75%"],
+ ["r","Lymphocytes","25%–33%"],
+ ["r","Monocytes","3%–7%"],
+ ["r","CD4+ T-lymphocyte count","≥500/mm³"],
+ ["r","Platelet count","150,000–400,000/mm³"],
+ ["r","Reticulocyte count","0.5%–1.5%"],
+ ["r","D-Dimer","≤250 ng/mL"],
+ ["r","Partial thromboplastin time (PTT) (activated)","25–40 seconds"],
+ ["r","Prothrombin time (PT)","11–15 seconds"],
+ ["r","Mean corpuscular hemoglobin (MCH)","25–35 pg/cell"],
+ ["r","Mean corpuscular hemoglobin concentration (MCHC)","31%–36% Hb/cell"],
+ ["r","Mean corpuscular volume (MCV)","80–100 μm³"],
+ ["S","Plasma"],
+ ["i","Male","25–43 mL/kg"],
+ ["i","Female","28–45 mL/kg"],
+ ["S","Red cell"],
+ ["i","Male","20–36 mL/kg"],
+ ["i","Female","19–31 mL/kg"]
+],
+"Urine and BMI": [
+ ["H","URINE & BMI"],
+ ["r","Calcium","100–300 mg/24 h"],
+ ["S","Creatinine clearance"],
+ ["i","Male","97–137 mL/min"],
+ ["i","Female","88–128 mL/min"],
+ ["r","Osmolality","50–1200 mOsmol/kg H₂O"],
+ ["r","Oxalate","8–40 μg/mL"],
+ ["r","Proteins, total","<150 mg/24 h"],
+ ["S","17-Hydroxycorticosteroids"],
+ ["i","Male","3.0–10.0 mg/24 h"],
+ ["i","Female","2.0–8.0 mg/24 h"],
+ ["S","17-Ketosteroids, total"],
+ ["i","Male","8–20 mg/24 h"],
+ ["i","Female","6–15 mg/24 h"],
+ ["r","Body mass index (BMI), adult","19–25 kg/m²"]
+]
+};
+let labTab = "Serum", labQ = "";
+function labRows(){
+  const q = labQ.trim().toLowerCase();
+  const tabs = q ? Object.keys(LABS) : [labTab];
+  let html = "";
+  tabs.forEach(t => {
+    let rows = LABS[t];
+    if(q){
+      // keep a row if it matches; keep continuation rows under a matching parent; keep group headers with matches below
+      const out = []; let parent = null, parentHit = false, sub = null;
+      rows.forEach(r => {
+        const [k,n,v] = r;
+        if(k==="H"){ return; }
+        if(k==="S"){ sub = r; parentHit = n.toLowerCase().includes(q); if(parentHit) out.push(r); return; }
+        if(k==="c"){ if(parentHit) out.push(r); return; }
+        const hit = (n+" "+(v||"")).toLowerCase().includes(q) || (sub && k==="i" && sub[1].toLowerCase().includes(q));
+        parentHit = hit;
+        if(hit){ if(sub && k==="i" && !out.includes(sub)) out.push(sub); out.push(r); }
+      });
+      if(!out.length) return;
+      html += `<tr class="lh"><td colspan="2">${esc(t.toUpperCase())}</td></tr>`;
+      rows = out;
+    }
+    rows.forEach(([k,n,v]) => {
+      if(k==="H") html += `<tr class="lh"><td>${esc(n)}</td><td>Reference Range</td></tr>`;
+      else if(k==="S") html += `<tr class="ls"><td colspan="2">${esc(n)}</td></tr>`;
+      else html += `<tr class="l${k}"><td>${esc(n)}</td><td>${esc(v).replace(/^ {3}/,"&emsp;")}</td></tr>`;
+    });
+  });
+  return html || `<tr><td colspan="2" class="lempty">Nenhum resultado para “${esc(labQ)}”.</td></tr>`;
+}
+function renderLabBody(){
+  const b = document.getElementById("labbody"); if(b) b.innerHTML = labRows();
+  document.querySelectorAll(".labtabs button").forEach(x => { x.setAttribute("aria-selected", (!labQ && x.dataset.t===labTab) ? "true" : "false"); });
+}
+function openLabs(){
+  if(document.getElementById("labpanel")) { closeLabs(); return; }
+  const p = document.createElement("aside");
+  p.id = "labpanel"; p.className = "labpanel"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Lab Values");
+  p.innerHTML = `<div class="labhead"><input id="labsearch" type="search" placeholder="Search" aria-label="Buscar exame" value="${esc(labQ)}"><button type="button" class="labx" id="labx" aria-label="Fechar Lab Values">✕</button></div>
+    <div class="labtabs" role="tablist">${Object.keys(LABS).map(t=>`<button type="button" role="tab" data-t="${t}">${t}</button>`).join("")}</div>
+    <div class="labscroll"><table class="labtbl"><tbody id="labbody"></tbody></table></div>`;
+  document.body.appendChild(p);
+  renderLabBody();
+  const s = document.getElementById("labsearch");
+  s.addEventListener("input", () => { labQ = s.value; renderLabBody(); });
+  p.querySelectorAll(".labtabs button").forEach(b => b.onclick = () => { labTab = b.dataset.t; labQ = ""; s.value = ""; renderLabBody(); p.querySelector(".labscroll").scrollTop = 0; });
+  document.getElementById("labx").onclick = closeLabs;
+  const lb = document.getElementById("labbtn"); if(lb) lb.setAttribute("aria-pressed","true");
+}
+function closeLabs(){ const p = document.getElementById("labpanel"); if(p) p.remove(); const lb = document.getElementById("labbtn"); if(lb) lb.setAttribute("aria-pressed","false"); }
+document.addEventListener("keydown", e => { if(e.key==="Escape" && document.getElementById("labpanel")) closeLabs(); });
+
 function renderExam(review){
+  closeLabs();
   { const r0=document.getElementById("rlist"); var __st = r0 ? r0.scrollTop : null; }
   hlSetup(); if(hlBtn) hlBtn.style.display="none";
   const i = S.cur;
@@ -518,6 +744,7 @@ function renderExam(review){
       <span class="counter">${i+1} / ${N}</span>
       <button class="tb" id="next" ${i===N-1?"disabled":""}>${ICON.next}<span class="lbl">Próxima</span></button>
       <span class="spacer"></span>
+      <button class="tb" id="labbtn" type="button" aria-pressed="false" title="Lab Values">${ICON.lab}<span class="lbl">Lab Values</span></button>
       <div class="fz" role="group" aria-label="Tamanho da letra"><button id="fzm" type="button" aria-label="Diminuir letra" title="Diminuir letra">A−</button><button id="fzp" class="big" type="button" aria-label="Aumentar letra" title="Aumentar letra">A+</button></div>
       ${FS_OK ? `<button class="tb" id="fs" aria-label="Tela cheia">${isFS()?ICON.exitfull:ICON.full}<span class="lbl">${isFS()?"Sair da tela cheia":"Tela cheia"}</span></button>` : ""}
     </header>
@@ -542,6 +769,7 @@ function renderExam(review){
   document.getElementById("fzm").onclick = () => { if(fsIdx>0){ fsIdx--; applyFont(); } };
   document.getElementById("fzp").onclick = () => { if(fsIdx<FS_STEPS.length-1){ fsIdx++; applyFont(); } };
   applyFont();
+  document.getElementById("labbtn").onclick = openLabs;
   const fsb = document.getElementById("fs"); if(fsb) fsb.onclick = () => isFS() ? exitFS() : goFS();
   { const r1=document.getElementById("rlist"); if(r1 && __st!=null) r1._st=__st; }
   { const cur = document.querySelector('.rail [aria-current="true"]'); const rail = document.getElementById("rlist"); if(cur && rail && rail._st!=null) rail.scrollTop = rail._st; if(cur && rail){ const rb=rail.getBoundingClientRect(), cb=cur.getBoundingClientRect(); if(cb.top<rb.top+30 || cb.bottom>rb.bottom-10) cur.scrollIntoView({block:"center"}); } }
