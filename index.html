@@ -114,7 +114,7 @@ button{font:inherit;color:inherit}
 .prog i{display:block;height:100%;background:#AFE1FA;border-radius:0 3px 3px 0;transition:width .45s var(--ease)}
 @media (prefers-reduced-motion:no-preference){
   .sheet.enter{animation:qin .32s var(--ease)}
-  @keyframes qin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes qin{from{opacity:0;transform:translate(var(--dx,0px),var(--dy,8px))}to{opacity:1;transform:none}}
   .intro.reveal>*{animation:rise .6s var(--ease) both}
   .intro.reveal>*:nth-child(2){animation-delay:.08s}
   .intro.reveal>*:nth-child(3){animation-delay:.16s}
@@ -235,6 +235,47 @@ table.rev button{background:transparent;border:0;color:var(--navy);text-decorati
 }
 @media (min-width:641px){ .only-mobile{display:none} }
 @media (prefers-reduced-motion:no-preference){ .opt{transition:background .15s} }
+
+/* ---- refinamentos: toque, contraste, transparência, movimento ---- */
+button,.opt,.mode,label,.btn,.rail li button,.strike{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.opt{transition:background .2s var(--ease),transform .15s var(--ease)}
+.opt:active{background:var(--sel);transform:scale(.995)}
+.rail li button{transition:background .15s var(--ease),transform .15s var(--ease)}
+.rail li button:active{transform:scale(.97)}
+.tb:active,.fz button:active,.strike:active,.rail .rarrow:active{transform:scale(.94);opacity:.85}
+.tb,.fz button,.strike,.rail .rarrow{transition:background .2s var(--ease),transform .15s var(--ease),opacity .15s}
+.mode:active{transform:scale(.99)}
+@media (pointer:coarse){
+  .fz button{min-height:44px;min-width:44px}
+  .tb{min-height:44px;min-width:44px}
+  .rail .rarrow{padding:12px 0}
+  .strike{min-width:44px;min-height:44px}
+  .opt{padding-block:12px}
+}
+@media (prefers-contrast:more){
+  :root{--muted:#2B3A57;--line:#7C93AE}
+  .opts,.namein,.codein{border-color:#4B607C}
+  .opt .L,.pct{color:var(--ink)}
+}
+@media (prefers-reduced-transparency:reduce){
+  .veil{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(6,16,39,.82)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+  .opt:active,.rail li button:active,.tb:active,.fz button:active,.btn:active,.mode:active{transform:none}
+  .prog i,.ring .arc{transition:none}
+  .sheet.enter{animation:rfade .15s linear}
+  @keyframes rfade{from{opacity:0}to{opacity:1}}
+}
+
+/* Lab Values ancorado ao botao */
+@media (prefers-reduced-motion:no-preference){
+  .labpanel{transform-origin:var(--ox,100%) var(--oy,0)}
+  .labpanel.pop-in{animation:labin .28s var(--ease) both}
+  .labpanel.pop-out{animation:labout .2s var(--ease) both;pointer-events:none}
+  @keyframes labin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+  @keyframes labout{from{opacity:1;transform:none}to{opacity:0;transform:scale(.6)}}
+}
 </style>
 
 <div id="app"></div>
@@ -750,7 +791,7 @@ function renderLabBody(){
   document.querySelectorAll(".labtabs button").forEach(x => { x.setAttribute("aria-selected", (!labQ && x.dataset.t===labTab) ? "true" : "false"); });
 }
 function openLabs(){
-  if(document.getElementById("labpanel")) { closeLabs(); return; }
+  if(document.getElementById("labpanel")) { closeLabs(true); return; }
   const p = document.createElement("aside");
   p.id = "labpanel"; p.className = "labpanel"; p.setAttribute("role","dialog"); p.setAttribute("aria-label","Lab Values");
   p.innerHTML = `<div class="labhead"><input id="labsearch" type="search" placeholder="Search" aria-label="Buscar exame" value="${esc(labQ)}"><button type="button" class="labx" id="labx" aria-label="Fechar Lab Values">✕</button></div>
@@ -761,17 +802,22 @@ function openLabs(){
   const s = document.getElementById("labsearch");
   s.addEventListener("input", () => { labQ = s.value; renderLabBody(); });
   p.querySelectorAll(".labtabs button").forEach(b => b.onclick = () => { labTab = b.dataset.t; labQ = ""; s.value = ""; renderLabBody(); p.querySelector(".labscroll").scrollTop = 0; });
-  document.getElementById("labx").onclick = closeLabs;
+  document.getElementById("labx").onclick = () => closeLabs(true);
+  { const lb0=document.getElementById("labbtn"); const RMl=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(lb0 && !RMl){ const r=lb0.getBoundingClientRect(), pr=p.getBoundingClientRect(); p.style.setProperty("--ox",(r.left+r.width/2-pr.left)+"px"); p.style.setProperty("--oy",(r.top+r.height/2-pr.top)+"px"); p.classList.add("pop-in"); } }
   const lb = document.getElementById("labbtn"); if(lb) lb.setAttribute("aria-pressed","true");
 }
-function closeLabs(){ const p = document.getElementById("labpanel"); if(p) p.remove(); const lb = document.getElementById("labbtn"); if(lb) lb.setAttribute("aria-pressed","false"); }
-document.addEventListener("keydown", e => { if(e.key==="Escape" && document.getElementById("labpanel")) closeLabs(); });
+function closeLabs(anim){ const p = document.getElementById("labpanel"); const lb = document.getElementById("labbtn"); if(lb) lb.setAttribute("aria-pressed","false");
+  if(!p) return;
+  if(anim && p.classList.contains("pop-in") && !p.classList.contains("pop-out")){ p.id="labpanel-closing"; p.classList.remove("pop-in"); p.classList.add("pop-out"); setTimeout(()=>p.remove(),200); return; }
+  p.remove(); }
+document.addEventListener("keydown", e => { if(e.key==="Escape" && document.getElementById("labpanel")) closeLabs(true); });
 
 function renderExam(review){
   closeLabs();
   { const r0=document.getElementById("rlist"); var __st = r0 ? r0.scrollTop : null; }
   hlSetup(); if(hlBtn) hlBtn.style.display="none";
-  const i = S.cur;
+  const i = S.cur; const __d = (window.__prevq==null||window.__prevq===i)?0:(i>window.__prevq?1:-1); window.__prevq=i;
   const railItems = Q.map((_,j)=>{
     let d = "dot";
     if(review || (S.mode==="tutor" && S.revealed[j])) d += S.ans[j]===keyOf(j) ? " ok" : (S.ans[j]===null ? "" : " no");
@@ -795,7 +841,7 @@ function renderExam(review){
     </header>
     <nav class="rail" id="rail" aria-label="Questões"><h3>Questões</h3><button type="button" class="rarrow" id="rup" aria-label="Rolar lista para cima">▲</button><div class="rlist" id="rlist"><ol>${railItems}</ol></div><button type="button" class="rarrow" id="rdown" aria-label="Rolar lista para baixo">▼</button></nav>
     <main class="main" id="main">
-      <article class="sheet${window.__qanim?" enter":""}">
+      <article class="sheet${window.__qanim?" enter":""}" style="--dx:${__d*14}px;--dy:${__d?0:8}px">
         ${review?"":`<label class="markrow" for="mark"><input type="checkbox" id="mark" ${S.marked[i]?"checked":""}><span class="flagico">⚑</span> Marcar questão</label>`}
         ${questionHTML(i, review)}
       </article>
