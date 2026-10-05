@@ -481,12 +481,12 @@ function renderIntro(){
         <label class="mode"><input type="radio" name="mode" id="mode-exam" value="exam" ${S.mode==="exam"?"checked":""}>
           <span><b>Modo prova</b><small>Cronômetro correndo, sem ver respostas. Nota e gabarito só no final do bloco.</small></span></label>
         <label class="mode"><input type="radio" name="mode" id="mode-tutor" value="tutor" ${S.mode==="tutor"?"checked":""}>
-          <span><b>Modo estudo</b><small>Você confirma cada resposta e vê na hora se acertou.</small></span></label>
+          <span><b>Modo estudo</b><small>Sem cronômetro. Você confirma cada resposta e vê na hora se acertou.</small></span></label>
       </div>
     </section>
     <div class="row">
       <button class="btn" id="start">Começar bloco</button>
-      ${saved && !saved.finished && saved.phase==="exam" ? `<button class="btn ghost" id="resume">Continuar de onde parei</button><span class="resume">Questão ${saved.cur+1}, ${fmt(LIMIT-saved.elapsed)} restantes</span>` : ""}
+      ${saved && !saved.finished && saved.phase==="exam" ? `<button class="btn ghost" id="resume">Continuar de onde parei</button><span class="resume">Questão ${saved.cur+1}${saved.mode==="tutor"?"":", "+fmt(LIMIT-saved.elapsed)+" restantes"}</span>` : ""}
       ${saved && saved.finished ? `<button class="btn ghost" id="last">Ver meu último resultado</button>` : ""}
     </div>
   </main>`;
@@ -847,7 +847,7 @@ function renderExam(review){
       </article>
     </main>
     <footer class="botbar">
-      ${review ? `<span class="clock">Revisão do bloco</span>` : `<span class="clock" id="clock">Tempo restante ${fmt(LIMIT-S.elapsed)}</span>`}
+      ${review ? `<span class="clock">Revisão do bloco</span>` : `<span class="clock" id="clock">${S.mode==="tutor"?"Sem limite de tempo":"Tempo restante "+fmt(LIMIT-S.elapsed)}</span>`}
       <span class="spacer" style="flex:1"></span>
       ${review ? `<button class="tb" id="back">${ICON.end}<span class="lbl">Voltar ao resultado</span></button>`
                : `<button class="tb" id="pause">${ICON.pause}<span class="lbl">Pausar</span></button><button class="tb" id="end">${ICON.end}<span class="lbl">Encerrar bloco</span></button>`}
@@ -904,10 +904,11 @@ function startClock(){
   let last = Date.now();
   tick = setInterval(() => {
     const now = Date.now(); S.elapsed += (now-last)/1000; last = now;
+    if(Math.floor(S.elapsed) % 5 === 0) save();
+    if(S.mode==="tutor") return;
     const left = LIMIT - S.elapsed;
     const c = document.getElementById("clock");
     if(c){ c.textContent = "Tempo restante " + fmt(left); c.classList.toggle("low", left <= 120); }
-    if(Math.floor(S.elapsed) % 5 === 0) save();
     if(left <= 0){ stopClock(); finish(true); }
   }, 1000);
 }
@@ -915,7 +916,7 @@ function stopClock(){ if(tick){ clearInterval(tick); tick = null; } }
 
 function finish(timeout){
   stopClock(); if(isFS()) exitFS();
-  S.finished = true; S.phase = "results"; S.elapsed = Math.min(S.elapsed, LIMIT);
+  S.finished = true; S.phase = "results"; if(S.mode!=="tutor") S.elapsed = Math.min(S.elapsed, LIMIT);
   save(); renderResults(timeout);
 }
 
@@ -953,7 +954,7 @@ function renderResults(timeout){
         <div><b>${c}</b><span>corretas</span></div>
         <div><b>${N-c-blank}</b><span>erradas</span></div>
         <div><b>${blank}</b><span>em branco</span></div>
-        <div><b>${fmt(S.elapsed)}</b><span>tempo usado de ${fmt(LIMIT)}</span></div>
+        <div><b>${fmt(S.elapsed)}</b><span>${S.mode==="tutor"?"tempo de estudo":"tempo usado de "+fmt(LIMIT)}</span></div>
       </div>
     </section>
     <section class="card">
