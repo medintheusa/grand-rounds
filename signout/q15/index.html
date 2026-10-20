@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Sign-Out · Question 15 · Grand Rounds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Lora:ital@1&family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><img src="../logo.png" alt="Med in the USA"><div><div class="k">Grand Rounds · Block 01</div><div class="s">Video 1 of 13</div></div></div>
+  <div class="band"><span>SIGN-OUT</span></div>
+  <h1>Question <em>15</em></h1>
+  <div class="topic">Pheochromocytoma &amp; neural crest</div>
+
+  <div class="player">
+    <video id="v" controls playsinline preload="metadata" src="q15.mp4"></video>
+    <div class="soon" id="soon" hidden><i>▶</i><b>Video coming soon</b><span>The explanation for Question 15 will be posted here.</span></div>
+  </div>
+
+  <div class="card"><small>Answer</small><div class="ans"><b>D</b><span>Melanocytes of the skin</span></div></div>
+  <div class="stats">
+    <div class="card"><small>The class</small><b>25%</b><span>got it right (3 of 12)</span></div>
+    <div class="card"><small>Most chosen wrong</small><b>B</b><span>Follicular cells of the thyroid (4 of 12)</span></div>
+  </div>
+
+  <div class="card"><small>Key points</small>
+    <ul class="pts">
+      <li>Pheochromocytoma comes from chromaffin cells of the adrenal <b>medulla</b>, which derive from the <b>neural crest</b>, like melanocytes.</li>
+      <li>The adrenal cortex is mesoderm. Thyroid follicular cells and hepatocytes are endoderm. Anterior pituitary is surface ectoderm (Rathke’s pouch).</li>
+      <li>Brother with a thyroid tumor at 30: think medullary thyroid carcinoma (parafollicular C cells) and <b>MEN 2 (RET)</b>.</li>
+    </ul>
+  </div>
+
+  <a class="btn" href="Grand_Rounds_SignOut_Q15.pdf" download>Download the PDF</a>
+  <div class="foot">MED IN THE USA</div>
+</main>
+<script>
+(function(){
+  var v=document.getElementById('v'), s=document.getElementById('soon');
+  function soon(){ v.hidden=true; s.hidden=false; }
+  v.addEventListener('error', soon, true);
+  var src=v.querySelector('source')||v; src.addEventListener && src.addEventListener('error', soon);
+  fetch(v.getAttribute('src'),{method:'HEAD'}).then(function(r){ if(!r.ok) soon(); }).catch(function(){});
+})();
+</script>
+</body>
+</html>
