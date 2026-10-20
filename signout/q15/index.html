@@ -59,8 +59,8 @@
     gate.hidden=true; content.hidden=false;
     sha(token+':'+Q).then(function(h){
       var src='v/'+h.slice(0,24)+'.mp4';
-      v.addEventListener('error', showSoon);
-      fetch(src,{method:'HEAD'}).then(function(r){ if(r.ok){ v.src=src; } else showSoon(); }).catch(showSoon);
+      v.addEventListener('error', function(){ if(!v.src) return; soon.querySelector('b').textContent='Tap to open the video'; soon.querySelector('span').innerHTML='<a href="'+src+'" style="color:#AFE1FA">Open the video in a new tab</a>'; showSoon(); });
+      fetch(src,{method:'HEAD'}).then(function(r){ if(r.ok){ v.src=src; } else showSoon(); }).catch(function(){ v.src=src; });
     });
   }
   var saved=null; try{ saved=localStorage.getItem(KEY) }catch(e){}
