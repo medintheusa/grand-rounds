@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Lora:ital@1&family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="../style.css">
+<script data-goatcounter="https://medintheusa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <main class="wrap">
@@ -63,6 +64,9 @@
       fetch(src,{method:'HEAD'}).then(function(r){ if(r.ok){ v.src=src; } else showSoon(); }).catch(function(){ v.src=src; });
     });
   }
+  function ev(name,title){ try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'signout-'+Q+'-'+name,title:title,event:true}); }catch(e){} }
+  var played=false; v.addEventListener('play',function(){ if(!played){ played=true; ev('play','Q15 · video play'); } });
+  v.addEventListener('ended',function(){ ev('ended','Q15 · video watched to the end'); });
   var saved=null; try{ saved=localStorage.getItem(KEY) }catch(e){}
   if(saved) open(saved); else { gate.hidden=false; }
   gate.addEventListener('submit', function(e){
@@ -70,7 +74,7 @@
     var c=inp.value.trim().toUpperCase().replace(/\s+/g,'');
     sha(c).then(function(h){
       if(h!==CODE_HASH){ msg.textContent='That code is not right. Check with the mentorship team.'; inp.select(); return; }
-      sha(c+':signout').then(function(t){ try{ localStorage.setItem(KEY,t) }catch(e){} open(t); });
+      sha(c+':signout').then(function(t){ try{ localStorage.setItem(KEY,t) }catch(e){} ev('unlock','Q15 · code entered'); open(t); });
     });
   });
 })();
