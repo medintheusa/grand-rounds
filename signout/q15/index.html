@@ -17,8 +17,16 @@
   <h1>Question <em>15</em></h1>
   <div class="topic">Pheochromocytoma &amp; neural crest</div>
 
+  <form class="card gate" id="gate" autocomplete="off" hidden>
+    <small>Mentees only</small>
+    <label for="code" class="gl">Enter the access code you use for Grand Rounds.</label>
+    <div class="grow"><input id="code" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="Access code" aria-describedby="gmsg"><button type="submit">Unlock</button></div>
+    <div class="gmsg" id="gmsg" role="status"></div>
+  </form>
+  <div id="content" hidden>
+
   <div class="player">
-    <video id="v" controls playsinline preload="metadata" src="q15.mp4"></video>
+    <video id="v" controls playsinline preload="metadata"></video>
     <div class="soon" id="soon" hidden><i>▶</i><b>Video coming soon</b><span>The explanation for Question 15 will be posted here.</span></div>
   </div>
 
@@ -37,15 +45,34 @@
   </div>
 
   <a class="btn" href="Grand_Rounds_SignOut_Q15.pdf" download>Download the PDF</a>
+  </div>
   <div class="foot">MED IN THE USA</div>
 </main>
 <script>
 (function(){
-  var v=document.getElementById('v'), s=document.getElementById('soon');
-  function soon(){ v.hidden=true; s.hidden=false; }
-  v.addEventListener('error', soon, true);
-  var src=v.querySelector('source')||v; src.addEventListener && src.addEventListener('error', soon);
-  fetch(v.getAttribute('src'),{method:'HEAD'}).then(function(r){ if(!r.ok) soon(); }).catch(function(){});
+  var Q='q15', CODE_HASH='9f90ea67a301a0e1ab9cd0e9cd91d859207829da59e6a147611ba50e753821fc', KEY='gr-signout-token';
+  function sha(t){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)).then(function(b){ return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('') }) }
+  var gate=document.getElementById('gate'), content=document.getElementById('content'), inp=document.getElementById('code'), msg=document.getElementById('gmsg');
+  var v=document.getElementById('v'), soon=document.getElementById('soon');
+  function showSoon(){ v.hidden=true; soon.hidden=false; }
+  function open(token){
+    gate.hidden=true; content.hidden=false;
+    sha(token+':'+Q).then(function(h){
+      var src='v/'+h.slice(0,24)+'.mp4';
+      v.addEventListener('error', showSoon);
+      fetch(src,{method:'HEAD'}).then(function(r){ if(r.ok){ v.src=src; } else showSoon(); }).catch(showSoon);
+    });
+  }
+  var saved=null; try{ saved=localStorage.getItem(KEY) }catch(e){}
+  if(saved) open(saved); else { gate.hidden=false; }
+  gate.addEventListener('submit', function(e){
+    e.preventDefault();
+    var c=inp.value.trim().toUpperCase().replace(/\s+/g,'');
+    sha(c).then(function(h){
+      if(h!==CODE_HASH){ msg.textContent='That code is not right. Check with the mentorship team.'; inp.select(); return; }
+      sha(c+':signout').then(function(t){ try{ localStorage.setItem(KEY,t) }catch(e){} open(t); });
+    });
+  });
 })();
 </script>
 </body>
