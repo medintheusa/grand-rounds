@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Sign-Out · Question 29 · Grand Rounds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Lora:ital@1&family=Poppins:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../style.css">
+<script data-goatcounter="https://medintheusa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><img src="../logo.png" alt="Med in the USA"><div><div class="k">Grand Rounds · Block 01</div><div class="s">Video 3 of 13</div></div></div>
+  <div class="band"><span>SIGN-OUT</span></div>
+  <h1>Question <em>29</em></h1>
+  <div class="topic">Anaphylaxis: PLC, IP3, Ca²⁺</div>
+
+  <form class="card gate" id="gate" autocomplete="off" hidden>
+    <small>Mentees only</small>
+    <label for="code" class="gl">Enter the access code you use for Grand Rounds.</label>
+    <div class="grow"><input id="code" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="Access code" aria-describedby="gmsg"><button type="submit">Unlock</button></div>
+    <div class="gmsg" id="gmsg" role="status"></div>
+  </form>
+  <div id="content" hidden>
+
+  <div class="player">
+    <video id="v" controls playsinline preload="metadata"></video>
+    <div class="soon" id="soon" hidden><i>▶</i><b>Video coming soon</b><span>The explanation for Question 29 will be posted here.</span></div>
+  </div>
+
+  <div class="card"><small>Answer</small><div class="ans"><b>C</b><span>Phospholipase C activation with inositol trisphosphate–mediated calcium release</span></div></div>
+  <div class="stats">
+    <div class="card"><small>The class</small><b>25%</b><span>got it right (3 of 12)</span></div>
+    <div class="card"><small>Most chosen wrong</small><b>B</b><span>Cyclooxygenase-mediated conversion of arachidonic acid (4 of 12)</span></div>
+  </div>
+
+  <div class="card"><small>Key points</small>
+    <ul class="pts">
+      <li>Bee sting in a sensitized patient: allergen <b>cross-links IgE on FcεRI</b> of mast cells (type I hypersensitivity).</li>
+      <li>Cross-linking activates <b>phospholipase C</b>: PIP₂ → <b>IP3</b> (Ca²⁺ release from the ER) + DAG (protein kinase C). The Ca²⁺ rise triggers degranulation of <b>preformed</b> histamine and tryptase.</li>
+      <li>Trap: the COX pathway (B) makes prostaglandins, which are <b>newly synthesized</b> mediators, not preformed. Epinephrine works through β₂ → ↑ cAMP, which stabilizes mast cells (A is the treatment, not the trigger).</li>
+    </ul>
+  </div>
+
+  <a class="btn" href="Grand_Rounds_SignOut_Q29.pdf" download>Download the PDF</a>
+  </div>
+  <div class="foot">MED IN THE USA</div>
+</main>
+<script>
+(function(){
+  var SOON=true, Q='q29', CODE_HASH='9f90ea67a301a0e1ab9cd0e9cd91d859207829da59e6a147611ba50e753821fc', KEY='gr-signout-token';
+  function sha(t){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)).then(function(b){ return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('') }) }
+  var gate=document.getElementById('gate'), content=document.getElementById('content'), inp=document.getElementById('code'), msg=document.getElementById('gmsg');
+  var v=document.getElementById('v'), soon=document.getElementById('soon');
+  function showSoon(){ v.hidden=true; soon.hidden=false; }
+  function open(token){
+    gate.hidden=true; content.hidden=false;
+    if(SOON){ showSoon(); return; }
+    sha(token+':'+Q).then(function(h){
+      var src='v/'+h.slice(0,24)+'.mp4';
+      v.addEventListener('error', function(){ if(!v.src) return; soon.querySelector('b').textContent='Tap to open the video'; soon.querySelector('span').innerHTML='<a href="'+src+'" style="color:#AFE1FA">Open the video in a new tab</a>'; showSoon(); });
+      fetch(src,{method:'HEAD'}).then(function(r){ if(r.ok){ v.src=src; } else showSoon(); }).catch(function(){ v.src=src; });
+    });
+  }
+  function ev(name,title){ try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'signout-'+Q+'-'+name,title:title,event:true}); }catch(e){} }
+  var played=false; v.addEventListener('play',function(){ if(!played){ played=true; ev('play','Q29 · video play'); } });
+  v.addEventListener('ended',function(){ ev('ended','Q29 · video watched to the end'); });
+  var saved=null; try{ saved=localStorage.getItem(KEY) }catch(e){}
+  if(saved) open(saved); else { gate.hidden=false; }
+  gate.addEventListener('submit', function(e){
+    e.preventDefault();
+    var c=inp.value.trim().toUpperCase().replace(/\s+/g,'');
+    sha(c).then(function(h){
+      if(h!==CODE_HASH){ msg.textContent='That code is not right. Check with the mentorship team.'; inp.select(); return; }
+      sha(c+':signout').then(function(t){ try{ localStorage.setItem(KEY,t) }catch(e){} ev('unlock','Q29 · code entered'); open(t); });
+    });
+  });
+})();
+</script>
+</body>
+</html>
