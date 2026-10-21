@@ -51,7 +51,7 @@
 </main>
 <script>
 (function(){
-  var SOON=true, Q='q29', CODE_HASH='9f90ea67a301a0e1ab9cd0e9cd91d859207829da59e6a147611ba50e753821fc', KEY='gr-signout-token';
+  var SOON=false, Q='q29', CODE_HASH='9f90ea67a301a0e1ab9cd0e9cd91d859207829da59e6a147611ba50e753821fc', KEY='gr-signout-token';
   function sha(t){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)).then(function(b){ return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('') }) }
   var gate=document.getElementById('gate'), content=document.getElementById('content'), inp=document.getElementById('code'), msg=document.getElementById('gmsg');
   var v=document.getElementById('v'), soon=document.getElementById('soon');
