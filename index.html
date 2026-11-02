@@ -258,7 +258,7 @@ button,.opt,.mode,label,.btn,.rail li button,.strike{touch-action:manipulation;-
 .rail li button:active{transform:scale(.97)}
 .tb:active,.fz button:active,.strike:active,.rail .rarrow:active{transform:scale(.94);opacity:.85}
 .tb,.fz button,.strike{transition:background .2s var(--ease),transform .15s var(--ease),opacity .15s}
-.rail .rarrow,.rail .rarrow:disabled{transition:none;opacity:1;background:var(--navy);color:var(--sheet)}
+.rail .rarrow,.rail .rarrow:disabled,.rail .rarrow:active,.rail .rarrow:hover,.rail .rarrow:focus{transition:none !important;opacity:1 !important;transform:none !important;background:var(--navy) !important;color:var(--sheet) !important;-webkit-tap-highlight-color:transparent;outline:none}
 .mode:active{transform:scale(.99)}
 @media (pointer:coarse){
   .fz button{min-height:44px;min-width:44px}
@@ -931,7 +931,7 @@ function renderExam(review){
       b.onclick = () => step(d);
       b.onpointerdown = () => { clearInterval(hold); hold=setInterval(()=>L.scrollBy({top:d*14}),40); };
       if(!__wired) ["pointerup","pointerleave","pointercancel"].forEach(ev => b.addEventListener(ev, () => clearInterval(hold))); });
-    const upd = () => { document.getElementById("rup").disabled = L.scrollTop<=0; document.getElementById("rdown").disabled = L.scrollTop+L.clientHeight>=L.scrollHeight-1; };
+    const upd = () => {};
     if(!__wired) L.addEventListener("scroll", upd); upd(); }
   document.getElementById("railbtn").onclick = () => { document.getElementById("rail").classList.toggle("open"); document.getElementById("rlist").dispatchEvent(new Event("scroll")); };
   if(review){ document.getElementById("back").onclick = () => { S.phase="results"; renderResults(); }; return; }
