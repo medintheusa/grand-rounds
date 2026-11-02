@@ -762,7 +762,17 @@ function closeLabs(anim){ const p = document.getElementById("labpanel"); const l
   p.remove(); }
 document.addEventListener("keydown", e => { if(e.key==="Escape" && document.getElementById("labpanel")) closeLabs(true); });
 
-function keepScroll(fn){ const m=document.getElementById("main"); const t=m?m.scrollTop:0; fn(); const m2=document.getElementById("main"); if(m2) m2.scrollTop=t; }
+function keepScroll(fn){
+  const m=document.getElementById("main"); const t=m?m.scrollTop:0;
+  fn();
+  const end=Date.now()+1200; let stop=false;
+  const halt=()=>{ stop=true; };
+  ["wheel","touchstart","keydown","mousedown"].forEach(ev=>window.addEventListener(ev,halt,{once:true,capture:true,passive:true}));
+  const fix=()=>{ const m2=document.getElementById("main"); if(m2 && !stop && Math.abs(m2.scrollTop-t)>1) m2.scrollTop=t; };
+  fix();
+  document.querySelectorAll("#main img").forEach(im=>{ if(!im.complete) im.addEventListener("load",fix,{once:true}); });
+  (function loop(){ fix(); if(!stop && Date.now()<end) requestAnimationFrame(loop); })();
+}
 function renderExam(review){
   closeLabs();
   { const r0=document.getElementById("rlist"); var __st = r0 ? r0.scrollTop : null; }
