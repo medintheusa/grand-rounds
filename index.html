@@ -851,6 +851,7 @@ function closeLabs(anim){ const p = document.getElementById("labpanel"); const l
   p.remove(); }
 document.addEventListener("keydown", e => { if(e.key==="Escape" && document.getElementById("labpanel")) closeLabs(true); });
 
+function keepScroll(fn){ const m=document.getElementById("main"); const t=m?m.scrollTop:0; fn(); const m2=document.getElementById("main"); if(m2) m2.scrollTop=t; }
 function renderExam(review){
   closeLabs();
   { const r0=document.getElementById("rlist"); var __st = r0 ? r0.scrollTop : null; }
@@ -913,9 +914,9 @@ function renderExam(review){
   document.getElementById("railbtn").onclick = () => { document.getElementById("rail").classList.toggle("open"); document.getElementById("rlist").dispatchEvent(new Event("scroll")); };
   if(review){ document.getElementById("back").onclick = () => { S.phase="results"; renderResults(); }; return; }
   document.getElementById("mark").onchange = e => { S.marked[i] = e.target.checked; save(); renderExam(); };
-  app.querySelectorAll(`input[name="q${i}"]`).forEach(r => r.onchange = e => { S.ans[i] = +e.target.value; S.struck[i] = S.struck[i].filter(x=>x!==S.ans[i]); save(); renderExam(); });
-  app.querySelectorAll("[data-strike]").forEach(b => b.onclick = e => { e.preventDefault(); const j=+b.dataset.strike; const s=S.struck[i]; S.struck[i] = s.includes(j) ? s.filter(x=>x!==j) : s.concat(j); if(S.ans[i]===j && S.struck[i].includes(j)) S.ans[i]=null; save(); renderExam(); });
-  const sq = document.getElementById("submitq"); if(sq) sq.onclick = () => { S.revealed[i] = true; save(); renderExam(); };
+  app.querySelectorAll(`input[name="q${i}"]`).forEach(r => r.onchange = e => { S.ans[i] = +e.target.value; S.struck[i] = S.struck[i].filter(x=>x!==S.ans[i]); save(); keepScroll(()=>renderExam()); });
+  app.querySelectorAll("[data-strike]").forEach(b => b.onclick = e => { e.preventDefault(); const j=+b.dataset.strike; const s=S.struck[i]; S.struck[i] = s.includes(j) ? s.filter(x=>x!==j) : s.concat(j); if(S.ans[i]===j && S.struck[i].includes(j)) S.ans[i]=null; save(); keepScroll(()=>renderExam()); });
+  const sq = document.getElementById("submitq"); if(sq) sq.onclick = () => { S.revealed[i] = true; save(); keepScroll(()=>renderExam()); };
   document.getElementById("end").onclick = confirmEnd;
   document.getElementById("pause").onclick = pauseDialog;
 }
