@@ -874,7 +874,7 @@ function renderExam(review){
     else if(S.ans[j]!==null) d += " done";
     return `<li><button data-go="${j}" ${j===i?'aria-current="true"':""}><span class="${d}"></span>${j+1}${S.marked[j]?'<span class="fl" aria-label="marcada">⚑</span>':""}</button></li>`;
   }).join("");
-  app.innerHTML = `
+  const __html = `
   <div class="exam">
     <header class="topbar">
       <button class="tb only-mobile" id="railbtn" aria-label="Lista de questões">${ICON.list}</button>
@@ -903,6 +903,17 @@ function renderExam(review){
                : `<button class="tb" id="pause">${ICON.pause}<span class="lbl">Pausar</span></button><button class="tb" id="end">${ICON.end}<span class="lbl">Encerrar bloco</span></button>`}
     </footer>
   </div>`;
+  { // keep the existing sidebar nodes (arrows) untouched so they never flicker
+    const oldRail = document.getElementById("rail");
+    if(oldRail && app.querySelector(".exam") && !review){
+      const t = document.createElement("template"); t.innerHTML = __html;
+      const nr = t.content.getElementById("rail");
+      oldRail.querySelector("#rlist ol").innerHTML = nr.querySelector("#rlist ol").innerHTML;
+      oldRail.className = nr.className;
+      nr.replaceWith(oldRail);
+      app.replaceChildren(...t.content.childNodes);
+    } else app.innerHTML = __html;
+  }
   const go = j => { S.cur = j; save(); window.__qanim = true; renderExam(review); window.__qanim = false; document.getElementById("main").scrollTop = 0; };
   document.getElementById("prev").onclick = () => go(i-1);
   document.getElementById("next").onclick = () => go(i+1);
@@ -914,14 +925,14 @@ function renderExam(review){
   const fsb = document.getElementById("fs"); if(fsb) fsb.onclick = () => isFS() ? exitFS() : goFS();
   { const r1=document.getElementById("rlist"); if(r1 && __st!=null) r1._st=__st; }
   { const cur = document.querySelector('.rail [aria-current="true"]'); const rail = document.getElementById("rlist"); if(cur && rail && rail._st!=null) rail.scrollTop = rail._st; if(cur && rail){ const rb=rail.getBoundingClientRect(), cb=cur.getBoundingClientRect(); if(cb.top<rb.top+30 || cb.bottom>rb.bottom-10) cur.scrollIntoView({block:"center"}); } }
-  { const L=document.getElementById("rlist"); let hold=null;
+  { const L=document.getElementById("rlist"); let hold=null; const __wired = !!L._wired; L._wired = true;
     const step = d => L.scrollBy({top:d*84, behavior:"smooth"});
     [["rup",-1],["rdown",1]].forEach(([id,d]) => { const b=document.getElementById(id);
       b.onclick = () => step(d);
       b.onpointerdown = () => { clearInterval(hold); hold=setInterval(()=>L.scrollBy({top:d*14}),40); };
-      ["pointerup","pointerleave","pointercancel"].forEach(ev => b.addEventListener(ev, () => clearInterval(hold))); });
+      if(!__wired) ["pointerup","pointerleave","pointercancel"].forEach(ev => b.addEventListener(ev, () => clearInterval(hold))); });
     const upd = () => { document.getElementById("rup").disabled = L.scrollTop<=0; document.getElementById("rdown").disabled = L.scrollTop+L.clientHeight>=L.scrollHeight-1; };
-    L.addEventListener("scroll", upd); upd(); }
+    if(!__wired) L.addEventListener("scroll", upd); upd(); }
   document.getElementById("railbtn").onclick = () => { document.getElementById("rail").classList.toggle("open"); document.getElementById("rlist").dispatchEvent(new Event("scroll")); };
   if(review){ document.getElementById("back").onclick = () => { S.phase="results"; renderResults(); }; return; }
   document.getElementById("mark").onchange = e => { S.marked[i] = e.target.checked; save(); renderExam(); };
